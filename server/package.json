@@ -1,18 +1,19 @@
 {
-  "name": "clashlog",
+  "name": "clashmetrics",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
- "scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js"
-},
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^5.2.1"
+    "exceljs": "^4.4.0",
+    "express": "^4.22.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
