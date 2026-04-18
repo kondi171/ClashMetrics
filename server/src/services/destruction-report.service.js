@@ -7,9 +7,12 @@ async function generateGloryListByDestruction(res, wars, players) {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Ranking Procentowy");
 
-    const START_COL = 4;
+    const START_COL = 5; 
     const SUM_COL = wars.length + START_COL;
     const UNIT_SYMBOL = "%"; 
+    
+    const BOLD_FONT = { name: 'Arial Black' };
+    const NORMAL_FONT = { name: 'Arial', size: 10 };
 
     const colors = {
       darkBg: "FF0D0D0D",
@@ -32,15 +35,6 @@ async function generateGloryListByDestruction(res, wars, players) {
 
     const centerAlignment = { vertical: "middle", horizontal: "center" };
 
-    /**
-     * =========================
-     * TOP BANNER (IDENTYCZNY JAK W STARS)
-     * =========================
-     */
-    const totalHeaderWidth = SUM_COL - 1;
-    const colListChwaly = Math.floor(totalHeaderWidth * 0.5);
-    const colProcenty = Math.floor(totalHeaderWidth * 0.2);
-
     const styleRange = (r1, c1, r2, c2, title) => {
       sheet.mergeCells(r1, c1, r2, c2);
       for (let r = r1; r <= r2; r++) {
@@ -48,60 +42,53 @@ async function generateGloryListByDestruction(res, wars, players) {
           const cell = sheet.getCell(r, c);
           cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.headerGreen } };
           cell.border = whiteBorder;
-          cell.font = { color: { argb: colors.white }, bold: true, size: 14 };
+          cell.font = { ...BOLD_FONT, color: { argb: colors.white }, bold: true, size: 14 };
           cell.alignment = centerAlignment;
         }
       }
       sheet.getCell(r1, c1).value = title;
     };
 
-    // Używamy tych samych zakresów co w Stars
-    styleRange(1, 2, 2, 1 + colListChwaly, "LISTA SKUTECZNOŚCI");
-    styleRange(1, 2 + colListChwaly, 2, 1 + colListChwaly + colProcenty, "PROCENTY");
+    const totalHeaderWidth = SUM_COL - 1;
+    const colListChwaly = Math.floor(totalHeaderWidth * 0.5);
+    const colProcenty = Math.floor(totalHeaderWidth * 0.2);
+
+    styleRange(1, 2, 2, 1 + colListChwaly, "LISTA CHWAŁY");
+    styleRange(1, 2 + colListChwaly, 2, 1 + colListChwaly + colProcenty, "DESTRUKCJA");
     styleRange(1, 2 + colListChwaly + colProcenty, 2, SUM_COL, "SEZON STYCZEŃ 2026");
 
-    /**
-     * =========================
-     * SORTOWANIE
-     * =========================
-     */
     const sortedPlayers = [...players].sort((a, b) => {
-      const getPlayerStats = (p) => {
-        return wars.reduce((acc, war) => {
+      const getStats = (p) => wars.reduce((acc, war) => {
           const m = war.myClan.members.find(member => member.tag === p.tag);
           if (!m) return acc;
           const atk = (m.attacks || []).reduce((sum, at) => sum + (at.destructionPercentage || 0), 0);
           const def = m.bestOpponentAttack ? m.bestOpponentAttack.destructionPercentage : 0;
           return { atk: acc.atk + atk, def: acc.def + def };
-        }, { atk: 0, def: 0 });
-      };
-      const statsA = getPlayerStats(a);
-      const statsB = getPlayerStats(b);
-      if (statsB.atk !== statsA.atk) return statsB.atk - statsA.atk;
-      return statsA.def - statsB.def;
+      }, { atk: 0, def: 0 });
+      const statsA = getStats(a); const statsB = getStats(b);
+      return (statsB.atk !== statsA.atk) ? statsB.atk - statsA.atk : statsA.def - statsB.def;
     });
 
-    /**
-     * =========================
-     * SUB-HEADER (POLSKA HUSARIA VS & SUMA)
-     * =========================
-     */
     const ROW_OFFSET = 3; 
-    sheet.getColumn(2).width = 30;
-    sheet.getColumn(3).width = 12;
+    sheet.getColumn(2).width = 8;   // LP. (nieco szersza na medal)
+    sheet.getColumn(3).width = 30;  // Gracz
+    sheet.getColumn(4).width = 16;  // Atak/Obrona
 
-    sheet.mergeCells(ROW_OFFSET, 2, ROW_OFFSET + 2, 3);
-    const husariaCell = sheet.getCell(ROW_OFFSET, 2);
-    husariaCell.value = "POLSKA HUSARIA VS";
-    for (let r = ROW_OFFSET; r <= ROW_OFFSET + 2; r++) {
-      for (let c = 2; c <= 3; c++) {
-        const cell = sheet.getCell(r, c);
+    sheet.mergeCells(ROW_OFFSET, 2, ROW_OFFSET + 2, 2);
+    sheet.getCell(ROW_OFFSET, 2).value = "LP.";
+    
+    sheet.mergeCells(ROW_OFFSET, 3, ROW_OFFSET + 2, 4);
+    sheet.getCell(ROW_OFFSET, 3).value = "POLSKA HUSARIA VS";
+
+    [2, 3, 4].forEach(cIdx => {
+      for (let r = ROW_OFFSET; r <= ROW_OFFSET + 2; r++) {
+        const cell = sheet.getCell(r, cIdx);
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.darkBg } };
-        cell.font = { color: { argb: colors.white }, bold: true, size: 12 };
+        cell.font = { ...BOLD_FONT, color: { argb: colors.white }, bold: true, size: 12 };
         cell.border = whiteBorder;
         cell.alignment = centerAlignment;
       }
-    }
+    });
 
     wars.forEach((war, index) => {
       const col = index + START_COL;
@@ -110,15 +97,15 @@ async function generateGloryListByDestruction(res, wars, players) {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.darkBg } };
         cell.border = whiteBorder;
         cell.alignment = centerAlignment;
-        cell.font = { color: { argb: colors.white }, bold: true };
+        cell.font = { ...BOLD_FONT, color: { argb: colors.white }, bold: true };
       }
       sheet.getCell(ROW_OFFSET, col).value = toRoman(index + 1);
       sheet.getCell(ROW_OFFSET + 1, col).value = war.enemyClan.name;
-      sheet.getCell(ROW_OFFSET + 1, col).font = { color: { argb: colors.white }, bold: true, size: 8 };
+      sheet.getCell(ROW_OFFSET + 1, col).font = { ...BOLD_FONT, color: { argb: colors.white }, bold: true, size: 8 };
       sheet.getCell(ROW_OFFSET + 1, col).alignment = { ...centerAlignment, wrapText: true };
       sheet.getCell(ROW_OFFSET + 2, col).value = formatDate(war.startTime);
-      sheet.getCell(ROW_OFFSET + 2, col).font = { color: { argb: colors.white }, size: 8 };
-      sheet.getColumn(col).width = 12;
+      sheet.getCell(ROW_OFFSET + 2, col).font = { ...BOLD_FONT, color: { argb: colors.white }, size: 8 };
+      sheet.getColumn(col).width = 14;
     });
 
     sheet.mergeCells(ROW_OFFSET, SUM_COL, ROW_OFFSET + 2, SUM_COL);
@@ -126,47 +113,55 @@ async function generateGloryListByDestruction(res, wars, players) {
     for (let r = ROW_OFFSET; r <= ROW_OFFSET + 2; r++) {
       const cell = sheet.getCell(r, SUM_COL);
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.darkBg } };
-      cell.font = { color: { argb: colors.white }, bold: true, size: 12 };
+      cell.font = { ...BOLD_FONT, color: { argb: colors.white }, bold: true, size: 12 };
       cell.border = whiteBorder;
       cell.alignment = centerAlignment;
     }
-    sheet.getColumn(SUM_COL).width = 15;
+    sheet.getColumn(SUM_COL).width = 16;
 
-    /**
-     * =========================
-     * BODY
-     * =========================
-     */
     sortedPlayers.forEach((player, index) => {
       const attackRow = index * 2 + ROW_OFFSET + 3;
       const defenseRow = attackRow + 1;
       let rowColor = (index % 2 === 0) ? colors.rowEven : colors.rowOdd;
-      let namePrefix = ""; let isPodium = false;
+      let lpValue = ""; 
 
-      if (index === 0) { rowColor = colors.gold; namePrefix = "🥇 "; isPodium = true; }
-      else if (index === 1) { rowColor = colors.silver; namePrefix = "🥈 "; isPodium = true; }
-      else if (index === 2) { rowColor = colors.bronze; namePrefix = "🥉 "; isPodium = true; }
+      if (index === 0) { rowColor = colors.gold; lpValue = "🥇"; }
+      else if (index === 1) { rowColor = colors.silver; lpValue = "🥈"; }
+      else if (index === 2) { rowColor = colors.bronze; lpValue = "🥉"; }
+      else { lpValue = `${index + 1}.`; }
 
+      const isPodium = index < 3;
       const rowFill = { type: "pattern", pattern: "solid", fgColor: { argb: rowColor } };
-      let totalAtk = 0; let totalDef = 0;
 
+      // LP. (z medalem lub numerem)
       sheet.mergeCells(attackRow, 2, defenseRow, 2);
-      const pCell = sheet.getCell(attackRow, 2);
-      pCell.value = `${namePrefix}${player.name}`;
+      const lpCell = sheet.getCell(attackRow, 2);
+      lpCell.value = lpValue;
+      lpCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.darkBg } };
+      lpCell.font = { ...BOLD_FONT, color: { argb: colors.white }, size: 12 };
+      lpCell.border = whiteBorder;
+      lpCell.alignment = centerAlignment;
+
+      // Gracz (sama nazwa)
+      sheet.mergeCells(attackRow, 3, defenseRow, 3);
+      const pCell = sheet.getCell(attackRow, 3);
+      pCell.value = player.name;
       pCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.darkBg } };
-      pCell.font = { color: { argb: colors.white }, bold: true };
+      pCell.font = { ...BOLD_FONT, color: { argb: colors.white }, size: 10 };
       pCell.border = whiteBorder;
       pCell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
 
+      // Label Atak/Obrona
       [attackRow, defenseRow].forEach((rIdx, i) => {
-        const cell = sheet.getCell(rIdx, 3);
+        const cell = sheet.getCell(rIdx, 4);
         cell.value = i === 0 ? "⚔️ Atak %" : "🛡️ Obrona %";
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.darkBg } };
-        cell.font = { color: { argb: colors.white }, size: 9 };
+        cell.font = { ...BOLD_FONT, color: { argb: colors.white }, size: 9 };
         cell.border = whiteBorder;
         cell.alignment = { vertical: "middle", horizontal: "left" };
       });
 
+      let totalAtk = 0; let totalDef = 0;
       wars.forEach((war, warIndex) => {
         const col = warIndex + START_COL;
         const m = war.myClan.members.find(member => member.tag === player.tag);
@@ -175,7 +170,7 @@ async function generateGloryListByDestruction(res, wars, players) {
           const cell = sheet.getCell(attackRow, col);
           cell.value = "BRAK UDZIAŁU";
           cell.fill = rowFill; cell.border = whiteBorder; cell.alignment = centerAlignment;
-          cell.font = { size: 7, color: isPodium ? "FF000000" : colors.grayText, italic: true };
+          cell.font = { ...NORMAL_FONT, size: 7, color: isPodium ? "FF000000" : colors.grayText, italic: true };
         } else {
           const atk = (m.attacks || []).reduce((sum, a) => sum + (a.destructionPercentage || 0), 0);
           const def = m.bestOpponentAttack ? m.bestOpponentAttack.destructionPercentage : 0;
@@ -184,7 +179,7 @@ async function generateGloryListByDestruction(res, wars, players) {
             const cell = sheet.getCell(rIdx, col);
             cell.value = `${i === 0 ? atk : def}${UNIT_SYMBOL}`;
             cell.fill = rowFill; cell.border = whiteBorder; cell.alignment = centerAlignment;
-            cell.font = { size: 10, color: isPodium ? { argb: "FF000000" } : undefined, bold: isPodium };
+            cell.font = { ...NORMAL_FONT, bold: isPodium, color: isPodium ? { argb: "FF000000" } : undefined };
           });
         }
       });
@@ -194,12 +189,12 @@ async function generateGloryListByDestruction(res, wars, players) {
       sCells[1].value = `${totalDef}${UNIT_SYMBOL}`;
       sCells.forEach(cell => {
         cell.fill = rowFill; cell.border = whiteBorder; cell.alignment = centerAlignment;
-        cell.font = { bold: true, size: 10, color: isPodium ? { argb: "FF000000" } : undefined };
+        cell.font = { ...NORMAL_FONT, bold: true, color: isPodium ? { argb: "FF000000" } : undefined };
       });
     });
 
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", 'attachment; filename="ranking-procentowy.xlsx"');
+    res.setHeader("Content-Disposition", 'attachment; filename="GloryListByDestruction.xlsx"');
     await workbook.xlsx.write(res);
     res.end();
   } catch (err) {
