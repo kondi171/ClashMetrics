@@ -1,13 +1,9 @@
 const ExcelJS = require("exceljs");
 const { getStats } = require("./war.service");
 const { formatDate } = require("../helpers/date.helper");
+const { toRoman } = require("../helpers/roman.helper");
 
-function toRoman(num) {
-  const romanMap = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV"];
-  return romanMap[num] || num.toString();
-}
-
-async function generateSeasonExcel(res, wars, players) {
+async function generateGloryListByStars(res, wars, players) {
   try {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet("Season");
@@ -37,11 +33,6 @@ async function generateSeasonExcel(res, wars, players) {
 
     const centerAlignment = { vertical: "middle", horizontal: "center" };
 
-    /**
-     * =========================
-     * TOP BANNER (BELKA CHWAŁY)
-     * =========================
-     */
     const totalHeaderWidth = SUM_COL - 1;
     const colListChwaly = Math.floor(totalHeaderWidth * 0.5);
     const colGwiazdki = Math.floor(totalHeaderWidth * 0.2);
@@ -71,11 +62,6 @@ async function generateSeasonExcel(res, wars, players) {
     styleRange(1, startGwiazdki, 2, endGwiazdki, "GWIAZDKI");
     styleRange(1, startSezon, 2, endSezon, "SEZON STYCZEŃ 2026");
 
-    /**
-     * =========================
-     * SORTOWANIE
-     * =========================
-     */
     const sortedPlayers = [...players].sort((a, b) => {
       const statsA = wars.reduce((acc, war) => {
         const s = getStats(war, a.tag);
@@ -89,16 +75,10 @@ async function generateSeasonExcel(res, wars, players) {
       return statsA.def - statsB.def;
     });
 
-    /**
-     * =========================
-     * SUB-HEADER (POLSKA HUSARIA VS & SUMA)
-     * =========================
-     */
     const ROW_OFFSET = 3; 
     sheet.getColumn(2).width = 30;
     sheet.getColumn(3).width = 12;
 
-    // SCALENIE "POLSKA HUSARIA VS" - Zwiększona czcionka i bold
     sheet.mergeCells(ROW_OFFSET, 2, ROW_OFFSET + 2, 3);
     const husariaCell = sheet.getCell(ROW_OFFSET, 2);
     husariaCell.value = "POLSKA HUSARIA VS";
@@ -106,13 +86,12 @@ async function generateSeasonExcel(res, wars, players) {
       for (let c = 2; c <= 3; c++) {
         const cell = sheet.getCell(r, c);
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.darkBg } };
-        cell.font = { color: { argb: colors.white }, bold: true, size: 12 }; // ZWIĘKSZONE NA 12
+        cell.font = { color: { argb: colors.white }, bold: true, size: 12 };
         cell.border = whiteBorder;
         cell.alignment = centerAlignment;
       }
     }
 
-    // Dynamiczne kolumny wojen
     wars.forEach((war, index) => {
       const col = index + START_COL;
       for (let r = ROW_OFFSET; r <= ROW_OFFSET + 2; r++) {
@@ -131,24 +110,18 @@ async function generateSeasonExcel(res, wars, players) {
       sheet.getColumn(col).width = 12;
     });
 
-    // SCALENIE "SUMA" - Zwiększona czcionka i bold
     sheet.mergeCells(ROW_OFFSET, SUM_COL, ROW_OFFSET + 2, SUM_COL);
     const sumHeaderCell = sheet.getCell(ROW_OFFSET, SUM_COL);
     sumHeaderCell.value = "SUMA";
     for (let r = ROW_OFFSET; r <= ROW_OFFSET + 2; r++) {
       const cell = sheet.getCell(r, SUM_COL);
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.darkBg } };
-      cell.font = { color: { argb: colors.white }, bold: true, size: 12 }; // ZWIĘKSZONE NA 12
+      cell.font = { color: { argb: colors.white }, bold: true, size: 12 };
       cell.border = whiteBorder;
       cell.alignment = centerAlignment;
     }
     sheet.getColumn(SUM_COL).width = 15;
 
-    /**
-     * =========================
-     * BODY
-     * =========================
-     */
     sortedPlayers.forEach((player, index) => {
       const attackRow = index * 2 + ROW_OFFSET + 3;
       const defenseRow = attackRow + 1;
@@ -165,7 +138,6 @@ async function generateSeasonExcel(res, wars, players) {
       let totalAttack = 0;
       let totalDefense = 0;
 
-      // Gracz (B)
       sheet.mergeCells(attackRow, 2, defenseRow, 2);
       const pCell = sheet.getCell(attackRow, 2);
       pCell.value = `${namePrefix}${player.name}`;
@@ -174,7 +146,6 @@ async function generateSeasonExcel(res, wars, players) {
       pCell.border = whiteBorder;
       pCell.alignment = { vertical: "middle", horizontal: "left", indent: 1 };
 
-      // Typ (C)
       [attackRow, defenseRow].forEach((rIdx, i) => {
         const cell = sheet.getCell(rIdx, 3);
         cell.value = i === 0 ? "⚔️ Atak" : "🛡️ Obrona";
@@ -184,7 +155,6 @@ async function generateSeasonExcel(res, wars, players) {
         cell.alignment = { vertical: "middle", horizontal: "left" };
       });
 
-      // Dane wojenne
       wars.forEach((war, warIndex) => {
         const col = warIndex + START_COL;
         const isPlayerInWar = war.myClan.members.some((m) => m.tag === player.tag);
@@ -212,7 +182,6 @@ async function generateSeasonExcel(res, wars, players) {
         }
       });
 
-      // Sumy
       const sCells = [sheet.getCell(attackRow, SUM_COL), sheet.getCell(defenseRow, SUM_COL)];
       sCells[0].value = `${totalAttack}${STAR_SYMBOL}`;
       sCells[1].value = `${totalDefense}${STAR_SYMBOL}`;
@@ -225,7 +194,7 @@ async function generateSeasonExcel(res, wars, players) {
     });
 
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    res.setHeader("Content-Disposition", 'attachment; filename="sezon-styczen-2026.xlsx"');
+    res.setHeader("Content-Disposition", 'attachment; filename="GloryListByStars.xlsx"');
     await workbook.xlsx.write(res);
     res.end();
   } catch (err) {
@@ -234,4 +203,4 @@ async function generateSeasonExcel(res, wars, players) {
   }
 }
 
-module.exports = { generateSeasonExcel };
+module.exports = { generateGloryListByStars };

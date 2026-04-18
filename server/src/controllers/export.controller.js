@@ -1,18 +1,34 @@
 const { readWars, getPlayers } = require("../services/war.service");
-const { generateSeasonExcel } = require("../services/excel.service");
+const { generateGloryListByStars } = require("../services/stars-report.service");
+const { generateGloryListByDestruction } = require("../services/destruction-report.service");
 
-async function exportSeason(req, res) {
+// Raport 1: Gwiazdki (tradycyjny)
+async function exportStars(req, res) {
   try {
     const wars = readWars();
     const players = getPlayers(wars);
 
-    await generateSeasonExcel(res, wars, players);
+    await generateGloryListByStars(res, wars, players);
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Błąd eksportu");
+    console.error("Błąd eksportu gwiazdek:", error);
+    res.status(500).send("Błąd eksportu raportu gwiazdek");
+  }
+}
+
+// Raport 2: Procenty (skuteczność)
+async function exportDestruction(req, res) {
+  try {
+    const wars = readWars();
+    const players = getPlayers(wars);
+
+    await generateGloryListByDestruction(res, wars, players);
+  } catch (error) {
+    console.error("Błąd eksportu procentów:", error);
+    res.status(500).send("Błąd eksportu raportu zniszczeń");
   }
 }
 
 module.exports = {
-  exportSeason,
+  exportStars,
+  exportDestruction,
 };
