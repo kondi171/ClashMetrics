@@ -1,6 +1,7 @@
 const ExcelJS = require("exceljs");
 const { formatDate } = require("../helpers/date.helper");
 const { toRoman } = require("../helpers/roman.helper");
+const { getSeasonName } = require("../helpers/date.helper");
 
 async function generateShameList(res, wars, players) {
   try {
@@ -72,7 +73,7 @@ async function generateShameList(res, wars, players) {
 
     sheet.mergeCells(1, splitPoint + 1, 2, SUM_COL);
     const rightH = sheet.getCell(1, splitPoint + 1);
-    rightH.value = "SEZON STYCZEŃ 2026";
+    rightH.value = `SEZON ${getSeasonName(wars)}`;
     rightH.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.headerRed } };
     rightH.font = { ...BOLD_FONT, color: { argb: colors.white }, size: 16 };
     rightH.alignment = centerAlignment;
@@ -85,7 +86,7 @@ async function generateShameList(res, wars, players) {
     [2, 3].forEach(cIdx => {
       sheet.mergeCells(ROW_OFFSET, cIdx, ROW_OFFSET + 2, cIdx);
       const cell = sheet.getCell(ROW_OFFSET, cIdx);
-      cell.value = cIdx === 2 ? "LP." : "POLSKA HUSARIA VS";
+      cell.value = cIdx === 2 ? "L.P." : "POLSKA HUSARIA VS";
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: colors.darkBg } };
       cell.font = { ...BOLD_FONT, color: { argb: colors.white }, size: 12 };
       cell.border = whiteBorder;

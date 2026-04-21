@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const WARS_DIR = path.join(__dirname, "../..", "data", "wars");
-const CLAN_TAG = "#2YRL8C2Q2";
+const WARS_DIR = path.join(__dirname, "../../..", "data", "cw");
+const CLAN_TAG = `#${process.env.CLAN_TAG}`;
 
 function readWars() {
   const files = fs
