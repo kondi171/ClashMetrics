@@ -13,4 +13,6 @@ router.get("/api/glory-list/destruction", exportController.exportGloryListByDest
 
 router.get("/api/cwl-list", exportController.exportCwlList);
 
+router.get("/api/clan-members", exportController.exportClanMembersList);
+
 module.exports = router;

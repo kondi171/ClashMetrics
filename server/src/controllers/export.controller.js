@@ -1,9 +1,11 @@
 const { readWars, getPlayers } = require("../services/cw.service");
-const { readCwlData } = require("../services/cwl.service"); // Import serwisu CWL
+const { readCwlData } = require("../services/cwl.service");
+const { readClanMembersData } = require("../services/clan.service"); // Import serwisu klanu
 const { generateGloryListByStars } = require("../reports/stars-report");
 const { generateGloryListByDestruction } = require("../reports/destruction-report");
 const { generateShameList } = require("../reports/missed-report");
-const { generateCwlList } = require("../reports/cwl-report"); // Import raportu CWL
+const { generateCwlList } = require("../reports/cwl-report");
+const { generateClanMembersList } = require("../reports/clan-report");
 
 async function exportShameList(req, res) {
   try {
@@ -51,9 +53,23 @@ async function exportCwlList(req, res) {
   }
 }
 
+async function exportClanMembersList(req, res) {
+  try {
+    const clanData = readClanMembersData();
+    if (!clanData) {
+      return res.status(404).send("Clan Data Not Found");
+    }
+    await generateClanMembersList(res, clanData);
+  } catch (error) {
+    console.error("Clan Members Export Error:", error);
+    res.status(500).send("Clan Members Export Error");
+  }
+}
+
 module.exports = {
   exportGloryListByStars,
   exportGloryListByDestruction,
   exportShameList,
   exportCwlList,
+  exportClanMembersList,
 };

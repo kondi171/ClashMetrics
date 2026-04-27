@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const CWL_FILE_PATH = path.join(__dirname, "../../..", "data", "cwl", "cwl.json");
+const CWL_FILE_PATH = path.join(__dirname, "../../..", "database", "cwl", "cwl.json");
 const MY_CLAN_TAG = `#${process.env.CLAN_TAG}`;
 
 function readCwlData() {
