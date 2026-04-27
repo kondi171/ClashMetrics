@@ -1,0 +1,132 @@
+.report-view {
+  min-height: 100vh;
+  background-color: $backgroundColor;
+  color: $textColor;
+  padding: 2rem;
+  font-family: $textFont;
+
+  .report-nav {
+    margin-bottom: 2rem;
+    .btn-back {
+      text-decoration: none;
+      color: $primaryColor;
+      font-family: $titleFont;
+      font-size: 0.9rem;
+      transition: 0.3s;
+      display: inline-block; // Dodane dla poprawnego działania transform
+
+      &:hover {
+        color: $textColor;
+        transform: translateX(-5px);
+      }
+    }
+  }
+
+  .report-header {
+    margin-bottom: 4rem;
+    h1 {
+      font-family: $titleFont;
+      font-size: 3rem;
+      color: $primaryColor;
+      text-shadow: 3px 3px 0px $secondaryColor;
+      margin: 0;
+      span {
+        color: $textColor;
+      }
+    }
+    p {
+      opacity: 0.7;
+      font-style: italic;
+    }
+  }
+
+  .control-card {
+    background: #2a2a2a; // Stały jaśniejszy kolor tła karty
+    border-radius: 20px;
+    padding: 3rem;
+    max-width: 800px;
+    margin: 0 auto;
+    border: 1px solid rgba($primaryColor, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    text-align: center;
+
+    h3 {
+      font-family: $titleFont;
+      font-size: 1.8rem;
+      color: $primaryColor;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      line-height: 1.6;
+      color: #cccccc; // Stały kolor tekstu (lekko szary)
+    }
+  }
+
+  .btn-download {
+    background-color: $primaryColor;
+    color: #1a1a1a; // Kolor tła aplikacji
+    font-family: $titleFont;
+    padding: 1.5rem 3rem;
+    border-radius: 12px;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 6px 0 #b38f00; // Stały ciemny złoty
+
+    &:hover:not(:disabled) {
+      background-color: $hoverColor;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #997a00; // Jeszcze ciemniejszy przy hover
+    }
+
+    &:active:not(:disabled) {
+      transform: Scale(0.98); // Dodany efekt kliknięcia z dużą literą "S"
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      filter: grayscale(1);
+    }
+  }
+
+  .error-msg {
+    background: rgba($secondaryColor, 0.1);
+    color: $secondaryColor;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid $secondaryColor;
+  }
+
+  .preview-placeholder {
+    margin-top: 4rem;
+    padding: 4rem;
+    border: 2px dashed rgba($textColor, 0.1);
+    border-radius: 20px;
+    text-align: center;
+    opacity: 0.3;
+  }
+}
+
+// Prosty loader
+.loader {
+  display: inline-block;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
