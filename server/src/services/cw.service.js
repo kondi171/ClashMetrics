@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const WARS_DIR = path.join(__dirname, "../../..", "database", "cw");
+const WARS_DIR = path.join(__dirname, "../..", "database", "cw");
 const CLAN_TAG = `#${process.env.CLAN_TAG}`;
 
 function readWars() {
@@ -48,7 +48,7 @@ function getPlayers(wars) {
   });
 
   return Array.from(map.values()).sort((a, b) =>
-    a.name.localeCompare(b.name, "pl")
+    a.name.localeCompare(b.name, "pl"),
   );
 }
 
@@ -56,15 +56,23 @@ function getStats(war, playerTag) {
   const member = war.myClan.members.find((m) => m.tag === playerTag);
 
   if (!member) {
-    return { attack: 0, defense: 0 };
+    return { attack: 0, atkDest: 0, defense: 0, defDest: 0 };
   }
 
+  // ATK: Gwiazdki i % zniszczeń (suma z obu ataków)
   const attack =
-    member.attacks?.reduce((sum, atk) => sum + atk.stars, 0) || 0;
+    member.attacks?.reduce((sum, atk) => sum + (atk.stars || 0), 0) || 0;
+  const atkDest =
+    member.attacks?.reduce(
+      (sum, atk) => sum + (atk.destructionPercentage || 0),
+      0,
+    ) || 0;
 
+  // DEF: Gwiazdki i % zniszczeń z najlepszej obrony
   const defense = member.bestOpponentAttack?.stars || 0;
+  const defDest = member.bestOpponentAttack?.destructionPercentage || 0;
 
-  return { attack, defense };
+  return { attack, atkDest, defense, defDest };
 }
 
 module.exports = {
