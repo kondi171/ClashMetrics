@@ -78,6 +78,7 @@ const fetchData = async () => {
 
     warsCount.value = response.data.warsCount;
     seasonName.value = response.data.seasonName;
+    console.log(response.data);
   } catch (error) {
     console.error("Błąd pobierania:", error);
     errorMessage.value =
