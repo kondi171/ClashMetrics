@@ -1,29 +1,35 @@
-require("dotenv").config(); // Standardowe ładowanie dla Rendera i lokalnego środowiska
+require("dotenv").config();
+
 const path = require("path");
+
+require("dotenv").config({ path: path.join(__dirname, "../..", ".env") });
+
 const express = require("express");
+
 const cors = require("cors");
 
 // Importy routerów
+
+// const exportRoutes = require("./routes/export.route");
+
 const dashboardRoutes = require("./routes/dashboard.route");
 
 const app = express();
 
-// Jeden, czysty CORS przepuszczający wszystko na czas testów
 app.use(cors());
-app.use(express.json());
 
-// Logowanie zapytań – bardzo pomoże Ci w zakładce Logs na Renderze
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
+
+app.use(express.json());
 
 app.use("/api", dashboardRoutes);
 
-// Dynamiczny port: Render sam przypisze port, lokalnie użyje 3000
-const PORT = process.env.PORT || 3000;
-const DOMAIN = process.env.APP_DOMAIN || `http://localhost:${PORT}`;
+// app.use("/api/export", exportRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on ${DOMAIN}`);
+app.listen(process.env.PORT, () => {
+  console.log(`Server is running on ${process.env.APP_DOMAIN}`);
 });
