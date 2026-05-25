@@ -3,12 +3,12 @@ const path = require("path");
 
 const CWL_FILE_PATH = path.join(
   __dirname,
-  "../..",
+  "../",
   "database",
   "cwl",
   "cwl.json",
 );
-const MY_CLAN_TAG = `#${process.env.CLAN_TAG}`;
+const MY_CLAN_TAG = `#${process.env.CLAN_TAG}` || "#2YRL8C2Q2";
 
 function readCwlData() {
   try {
