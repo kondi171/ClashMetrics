@@ -2,15 +2,12 @@ const fs = require("fs");
 const path = require("path");
 
 const WARS_DIR = path.join(__dirname, "../", "database", "cw");
-// const CLAN_TAG = `#${process.env.CLAN_TAG}` || "#2YRL8C2Q2";
-const CLAN_TAG = "#2YRL8C2Q2";
+const CLAN_TAG = `#${process.env.CLAN_TAG}` || "#2YRL8C2Q2";
 
 function readWars() {
   const files = fs
     .readdirSync(WARS_DIR)
     .filter((file) => file.endsWith(".json"));
-  console.log(`clantag: ${CLAN_TAG}`);
-  console.log(WARS_DIR);
   const wars = [];
 
   files.forEach((file) => {
@@ -61,7 +58,6 @@ function getStats(war, playerTag) {
     return { attack: 0, atkDest: 0, defense: 0, defDest: 0 };
   }
 
-  // ATK: Gwiazdki i % zniszczeń (suma z obu ataków)
   const attack =
     member.attacks?.reduce((sum, atk) => sum + (atk.stars || 0), 0) || 0;
   const atkDest =
@@ -69,8 +65,6 @@ function getStats(war, playerTag) {
       (sum, atk) => sum + (atk.destructionPercentage || 0),
       0,
     ) || 0;
-
-  // DEF: Gwiazdki i % zniszczeń z najlepszej obrony
   const defense = member.bestOpponentAttack?.stars || 0;
   const defDest = member.bestOpponentAttack?.destructionPercentage || 0;
 

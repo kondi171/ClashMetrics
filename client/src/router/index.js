@@ -10,7 +10,7 @@ const routes = [
   {
     path: "/cwl",
     name: "CwlReport",
-    component: () => import("@/views/CwlReport.vue"),
+    component: () => import("@/views/cwl-report/CwlReport.vue"),
   },
   {
     path: "/clan",

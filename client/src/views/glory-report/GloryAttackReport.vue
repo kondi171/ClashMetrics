@@ -3,14 +3,15 @@ const props = defineProps({
   players: Array,
   getRankDisplay: Function,
   getPodiumClass: Function,
-  formatWarValue: Function,
   getAvgClass: Function,
+  formatWarValue: Function,
 });
 </script>
+
 <template>
-  <table class="glory-table">
+  <table class="scores-table">
     <thead>
-      <tr class="row-main-head">
+      <tr class="row-main-head glory">
         <th rowspan="3" class="col-lp">L.P.</th>
         <th rowspan="3" class="col-player">GRACZ</th>
         <th rowspan="3" class="col-type">TYP</th>
@@ -22,7 +23,7 @@ const props = defineProps({
       </tr>
       <tr class="row-date">
         <th
-          class="col-war-data"
+          class="col-war-data glory"
           v-for="war in players[0]?.wars"
           :key="'date-' + war.warName"
         >
@@ -31,7 +32,7 @@ const props = defineProps({
       </tr>
       <tr class="row-roman">
         <th
-          class="col-war-data"
+          class="col-war-data glory"
           v-for="war in players[0]?.wars"
           :key="'roman-' + war.warName"
         >
@@ -42,9 +43,7 @@ const props = defineProps({
     <tbody>
       <template v-for="(p, idx) in players" :key="p.tag">
         <tr :class="['row-main', getPodiumClass(idx)]">
-          <td rowspan="2" class="cell-rank">
-            {{ getRankDisplay(idx) }}
-          </td>
+          <td rowspan="2" class="cell-rank">{{ getRankDisplay(idx) }}</td>
           <td rowspan="2" class="cell-name">
             <div class="name-wrapper">
               <span class="name">{{ p.name }}</span>
@@ -52,31 +51,32 @@ const props = defineProps({
             </div>
           </td>
           <td class="cell-type">Gwiazdki</td>
-          <td class="cell-total">{{ p.totalDefStars }}</td>
-          <td :class="['cell-avg', getAvgClass(p)]">{{ p.avgDefStars }}</td>
+          <td class="cell-total">{{ p.totalAtkStars }}</td>
+          <td :class="['cell-avg', getAvgClass(p)]">
+            {{ p.avgAtkStarsPerHit }}
+          </td>
           <td
             v-for="(war, wIdx) in p.wars"
-            :key="'def-val-' + wIdx"
+            :key="'val-' + wIdx"
             :rowspan="!war.isParticipant ? 2 : 1"
             :class="['cell-val', { 'no-part': !war.isParticipant }]"
           >
-            <template v-if="war.isParticipant">
-              {{ formatWarValue(war.defStars, "★") }}
-            </template>
+            <template v-if="war.isParticipant">{{
+              formatWarValue(war.atkStars, "★")
+            }}</template>
             <template v-else>BRAK UDZIAŁU</template>
           </td>
         </tr>
-
         <tr
           v-if="p.wars.some((w) => w.isParticipant)"
           :class="['row-sub', getPodiumClass(idx)]"
         >
           <td class="cell-type">Zniszczenia</td>
-          <td class="cell-total">{{ p.totalDefDest }}%</td>
-          <td class="cell-avg">{{ p.avgDefDest }}%</td>
-          <template v-for="(war, wIdx) in p.wars" :key="'def-sub-' + wIdx">
+          <td class="cell-total">{{ p.totalAtkDest + "%" }}</td>
+          <td class="cell-avg">{{ p.avgAtkDestPerHit + "%" }}</td>
+          <template v-for="(war, wIdx) in p.wars" :key="'sub-' + wIdx">
             <td v-if="war.isParticipant" class="cell-val sub-val">
-              {{ formatWarValue(war.defDest, "%") }}
+              {{ formatWarValue(war.atkDest, "%") }}
             </td>
           </template>
         </tr>
@@ -84,3 +84,6 @@ const props = defineProps({
     </tbody>
   </table>
 </template>
+<style scoped lang="scss">
+@use "@/assets/scss/_tables.scss";
+</style>

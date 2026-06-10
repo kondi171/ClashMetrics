@@ -1,0 +1,288 @@
+@import "variables";
+
+.report-view {
+  min-height: 100vh;
+  background-color: $backgroundColor;
+  background-image: linear-gradient(
+    180deg,
+    rgba($leagueOrange, 0.08) 0%,
+    rgba($leagueOrange, 0.03) 10%,
+    rgba(15, 15, 15, 0) 20%
+  );
+  border-top: 2px solid $leagueOrange;
+}
+
+span.text-inline {
+  margin-left: 1vmin;
+}
+
+.header-main {
+  padding: 2vmin 0 1vmin;
+
+  .header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2vmin;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 1vmin;
+    color: #aaa;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.3s;
+    &:hover {
+      color: $leagueOrange;
+      transform: translateX(-5px);
+    }
+  }
+  .header-title {
+    text-align: right;
+    .badge,
+    .cwl-badge {
+      display: inline-block;
+      background: rgba($leagueOrange, 0.2);
+      color: $leagueOrange;
+      padding: 1vmin 3vmin;
+      border-radius: 1vmin;
+      font-size: 1.5vmin;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 2vmin;
+    }
+    h1 {
+      font-size: 5vmin;
+      font-family: $subtitleFont;
+      margin: 0;
+      text-shadow: 0.3vmin 0.3vmin 0px #000000;
+      span {
+        color: $leagueOrange;
+        font-family: $subtitleFont;
+        text-shadow: 0.3vmin 0.3vmin 0px #000000;
+      }
+    }
+    .season-text {
+      font-size: 1.8vmin;
+      color: #666;
+      margin: 1vmin 0 2vmin 0;
+    }
+  }
+}
+
+.season-badge {
+  color: #aaa;
+  display: inline-block;
+  font-size: 2.2vmin;
+  margin: 1vmin 0;
+}
+
+.report-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2vmin 5vmin;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.table-outer-wrapper {
+  position: relative;
+
+  .table-scroll-hint {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 2vmin 0;
+    color: #666;
+    .icon {
+      display: inline-block;
+      animation: bounceHorizontal 1.5s infinite ease-in-out;
+      margin-right: 6px;
+      color: $leagueOrange;
+    }
+  }
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 2vmin;
+  border: 1px solid #222;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.cell-total {
+  font-weight: 800;
+  font-size: 1.1rem;
+  small {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    margin-left: 2px;
+    font-weight: 400;
+  }
+}
+
+.cell-avg {
+  font-weight: 700;
+  font-size: 1rem;
+  &.perfect {
+    color: #a855f7;
+  }
+  &.good {
+    color: #2ecc71;
+  }
+  &.neutral {
+    color: #f1c40f;
+  }
+  &.negative {
+    color: #e74c3c;
+  }
+}
+
+// Dodatkowe klasy dla CWL
+.avg-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  &.perfect {
+    background: #a855f7;
+    color: white;
+  }
+  &.good {
+    background: #27ae60;
+    color: white;
+  }
+  &.neutral {
+    background: #f1c40f;
+    color: black;
+  }
+  &.negative {
+    background: #e74c3c;
+    color: white;
+  }
+}
+
+.defense .cell-avg.accent {
+  color: #e74c3c;
+}
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-style: italic;
+}
+
+@media (max-width: 1100px) {
+  .header-main {
+    .header-container {
+      flex-direction: column-reverse;
+      gap: 2rem;
+      text-align: center;
+    }
+    .header-title {
+      text-align: center !important;
+      .badge,
+      .cwl-badge {
+        font-size: 0.9rem;
+        padding: 8px 16px;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+      }
+      h1 {
+        font-size: 8vmin;
+      }
+    }
+  }
+
+  .season-badge {
+    font-size: 1.1rem;
+    margin: 1rem 0;
+  }
+  .panel-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .control-panel {
+    padding: 1.5rem;
+    .panel-content {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 2rem;
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header-title {
+    h1 {
+      font-size: 2rem !important;
+    }
+    .badge,
+    .cwl-badge {
+      font-size: 0.85rem;
+    }
+  }
+
+  .season-badge {
+    font-size: 1rem;
+  }
+  .panel-header h3 {
+    font-size: 1.1rem;
+  }
+
+  .table-outer-wrapper {
+    margin: 0 -1rem;
+    .table-scroll-hint {
+      display: block;
+      padding: 10px;
+      background: rgba($leagueOrange, 0.1);
+      color: $leagueOrange;
+      font-size: 0.8rem;
+      animation: pulse 2s infinite;
+    }
+  }
+
+  .table-wrapper {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounceHorizontal {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}

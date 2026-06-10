@@ -33,44 +33,48 @@ defineEmits(["close"]);
           <section class="modal-section">
             <h4>⚔️ Skuteczność Ofensywna</h4>
             <table class="modal-info-table">
-              <tr class="rank-perfect">
-                <td><strong>Fioletowa (Perfekcyjna)</strong></td>
-                <td>Skuteczność dokładnie 3.0 gwiazdki na atak</td>
-              </tr>
-              <tr class="rank-good">
-                <td><strong>Zielona (Świetna)</strong></td>
-                <td>Skuteczność od 2.5 do 2.99 gwiazdki na atak</td>
-              </tr>
-              <tr class="rank-neutral">
-                <td><strong>Żółta (Stabilna)</strong></td>
-                <td>Skuteczność od 2.0 do 2.49 gwiazdki na atak</td>
-              </tr>
-              <tr class="rank-negative">
-                <td><strong>Czerwona (Słaba)</strong></td>
-                <td>Skuteczność poniżej 2.0 gwiazdki na atak</td>
-              </tr>
+              <tbody>
+                <tr class="rank-perfect">
+                  <td><strong>Fioletowa (Perfekcyjna)</strong></td>
+                  <td>Skuteczność dokładnie 3.0 gwiazdki na atak</td>
+                </tr>
+                <tr class="rank-good">
+                  <td><strong>Zielona (Świetna)</strong></td>
+                  <td>Skuteczność od 2.5 do 2.99 gwiazdki na atak</td>
+                </tr>
+                <tr class="rank-neutral">
+                  <td><strong>Żółta (Stabilna)</strong></td>
+                  <td>Skuteczność od 2.0 do 2.49 gwiazdki na atak</td>
+                </tr>
+                <tr class="rank-negative">
+                  <td><strong>Czerwona (Słaba)</strong></td>
+                  <td>Skuteczność poniżej 2.0 gwiazdki na atak</td>
+                </tr>
+              </tbody>
             </table>
           </section>
 
           <section class="modal-section">
             <h4>🛡️ Skuteczność Defensywna</h4>
             <table class="modal-info-table">
-              <tr class="rank-perfect">
-                <td><strong>Fioletowa (Twierdza)</strong></td>
-                <td>Średnio 0.0 straconych gwiazdek (czysty arkusz)</td>
-              </tr>
-              <tr class="rank-good">
-                <td><strong>Zielona (Świetna obrona)</strong></td>
-                <td>Średnio od 0.01 do 1.50 straconych gwiazdek</td>
-              </tr>
-              <tr class="rank-neutral">
-                <td><strong>Żółta (Ostrzeżenie)</strong></td>
-                <td>Średnio od 1.51 do 2.00 straconych gwiazdek</td>
-              </tr>
-              <tr class="rank-negative">
-                <td><strong>Czerwona (Słaba obrona)</strong></td>
-                <td>Średnio powyżej 2.00 straconych gwiazdek</td>
-              </tr>
+              <tbody>
+                <tr class="rank-perfect">
+                  <td><strong>Fioletowa (Twierdza)</strong></td>
+                  <td>Średnio do 1.50 straconych gwiazdek</td>
+                </tr>
+                <tr class="rank-good">
+                  <td><strong>Zielona (Zamek)</strong></td>
+                  <td>Średnio od 1.51 do 2.00 straconych gwiazdek</td>
+                </tr>
+                <tr class="rank-neutral">
+                  <td><strong>Żółta (Wioska)</strong></td>
+                  <td>Średnio od 2.01 do 2.50 straconych gwiazdek</td>
+                </tr>
+                <tr class="rank-negative">
+                  <td><strong>Czerwona (Szałas)</strong></td>
+                  <td>Średnio powyżej 2.50 straconych gwiazdek</td>
+                </tr>
+              </tbody>
             </table>
           </section>
           <p>

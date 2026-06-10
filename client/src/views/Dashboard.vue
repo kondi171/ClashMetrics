@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from "vue-router";
-
+import Footer from "../components/Footer.vue";
 const router = useRouter();
 const navigateTo = (routeName) => {
   router.push({ name: routeName });
@@ -71,14 +71,11 @@ const navigateTo = (routeName) => {
       </div>
     </main>
 
-    <footer class="dashboard-footer">
-      <p>&copy; 2026 Polska Husaria Management System • v2.0</p>
-    </footer>
+    <Footer />
   </div>
 </template>
 <style scoped lang="scss">
 .dashboard {
-  // Blokujemy wysokość, by całość była "app-like"
   height: 100vh;
   width: 100vw;
   background-color: $backgroundColor;
@@ -139,9 +136,7 @@ const navigateTo = (routeName) => {
     flex-grow: 1;
     overflow-y: auto;
 
-    // Opcjonalnie: jeśli chcesz, żeby na bardzo szerokich ekranach
-    // karty też były idealnie wycentrowane jako grupa:
-    padding-left: 2vmin; // Mała korekta wizualna
+    padding-left: 2vmin;
   }
 
   .card {
@@ -221,14 +216,6 @@ const navigateTo = (routeName) => {
     border: 0.3vmin solid $primaryColor;
     color: $primaryColor;
     box-shadow: 0 0.4vmin 0 rgba($primaryColor, 0.1);
-  }
-
-  .dashboard-footer {
-    flex-shrink: 0;
-    text-align: center;
-    opacity: 0.3;
-    font-size: 1.6vmin;
-    padding: 2vmin 0;
   }
 }
 

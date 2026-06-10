@@ -1,19 +1,61 @@
 const fs = require("fs");
 const path = require("path");
 
-const CWL_FILE_PATH = path.join(
-  __dirname,
-  "../",
-  "database",
-  "cwl",
-  "cwl.json",
-);
+// Ścieżka do całego folderu z plikami CWL (zamiast do jednego pliku)
+const CWL_DIR_PATH = path.join(__dirname, "../", "database", "cwl");
 const MY_CLAN_TAG = `#${process.env.CLAN_TAG}` || "#2YRL8C2Q2";
 
-function readCwlData() {
+/**
+ * Funkcja skanująca folder i zwracająca listę dostępnych plików CWL wraz z ich sezonami
+ */
+function getAvailableCwlFiles() {
   try {
-    if (!fs.existsSync(CWL_FILE_PATH)) return null;
-    const data = JSON.parse(fs.readFileSync(CWL_FILE_PATH, "utf8"));
+    if (!fs.existsSync(CWL_DIR_PATH)) return [];
+
+    const files = fs.readdirSync(CWL_DIR_PATH);
+
+    // Szukamy plików spełniających warunek: zaczynają się od "cwl" i kończą na ".json"
+    const cwlFiles = files.filter(
+      (file) => file.startsWith("cwl") && file.endsWith(".json"),
+    );
+
+    return cwlFiles.map((file) => {
+      const filePath = path.join(CWL_DIR_PATH, file);
+      let seasonName = file.replace(".json", "").toUpperCase(); // Domyślnie np. "CWL1"
+
+      try {
+        const content = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        if (content.season) {
+          seasonName = content.season; // Jeśli w pliku jest pole season, bierzemy je (np. "2025-07")
+        }
+      } catch (e) {
+        console.error(`Błąd odczytu sezonu z pliku ${file}:`, e);
+      }
+
+      return {
+        fileId: file.replace(".json", ""), // np. "cwl1", "cwl10"
+        season: seasonName, // np. "2025-07"
+      };
+    });
+  } catch (err) {
+    console.error("CWL SERVICE LIST FILES ERROR:", err);
+    return [];
+  }
+}
+
+/**
+ * Główna funkcja czytająca dane konkretnego pliku CWL
+ * @param {string} fileId - identyfikator pliku, np. "cwl1", "cwl10", "cwl11"
+ */
+function readCwlData(fileId = "cwl1") {
+  // Ustawiamy domyślnie cwl1, jeśli folder nie ma czystego "cwl"
+  try {
+    // Dynamiczne budowanie ścieżki na podstawie przesłanego fileId
+    const fileName = `${fileId}.json`;
+    const filePath = path.join(CWL_DIR_PATH, fileName);
+
+    if (!fs.existsSync(filePath)) return null;
+    const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
 
     const myClanInfo = data.clans.find((c) => c.tag === MY_CLAN_TAG);
     const players = myClanInfo ? myClanInfo.members : [];
@@ -27,7 +69,6 @@ function readCwlData() {
       )
         return [];
       return round.warTags.map((war) => {
-        // Wyznaczanie zwycięzcy bitwy (gwiazdki -> destrukcja)
         let winnerTag = null;
         if (war.clan.stars > war.opponent.stars) winnerTag = war.clan.tag;
         else if (war.opponent.stars > war.clan.stars)
@@ -132,7 +173,6 @@ function readCwlData() {
       players: sortedPlayers,
       clans: data.clans,
       allRoundsWars,
-      getPlayerWarStats,
     };
   } catch (err) {
     console.error("CWL SERVICE ERROR:", err);
@@ -140,4 +180,8 @@ function readCwlData() {
   }
 }
 
-module.exports = { readCwlData };
+// Pamiętaj o wyeksportowaniu OBU funkcji!
+module.exports = {
+  readCwlData,
+  getAvailableCwlFiles,
+};

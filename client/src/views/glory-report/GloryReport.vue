@@ -1,9 +1,13 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import axios from "axios";
-import AttackReport from "./AttackReport.vue";
-import DefenseReport from "./DefenseReport.vue";
-import GloryInfoModal from "./GloryInfoModal.vue";
+import GloryAttackReport from "./GloryAttackReport.vue";
+import GloryDefenseReport from "./GloryDefenseReport.vue";
+import InfoModal from "../../components/InfoModal.vue";
+import Footer from "../../components/Footer.vue";
+import LoadingSpinner from "@/components/LoadingSpinner.vue";
+import FloatingActionPanel from "@/components/FloatingActionPanel.vue";
+import ErrorMessage from "@/components/ErrorMessage.vue";
 
 const players = ref([]);
 const warsCount = ref(0);
@@ -23,6 +27,7 @@ const isModalOpen = ref(false);
 const exportToExcel = () => {
   console.log("Eksportowanie obecnej tabeli do pliku Excel...");
 };
+
 const fetchData = async () => {
   isLoading.value = true;
   errorMessage.value = "";
@@ -54,7 +59,7 @@ const fetchData = async () => {
       return;
     }
 
-    players.value = response.data.players.map((p) => {
+    const mappedPlayers = response.data.players.map((p) => {
       const totalWars = response.data.warsCount;
       const part = p.warsParticipated || 0;
       const missing = totalWars - part;
@@ -76,9 +81,42 @@ const fetchData = async () => {
       };
     });
 
+    // --- OBLIČZANIE POZYCJI SPORTOWEJ ORAZ UNIKALNYCH MEDALI W LIŚCIE CHWAŁY ---
+    let currentRank = 1;
+    let currentMedalTier = 1;
+
+    for (let i = 0; i < mappedPlayers.length; i++) {
+      if (i > 0) {
+        const prev = mappedPlayers[i - 1];
+        const curr = mappedPlayers[i];
+
+        let isEqual = false;
+        if (reportMode.value === "attack") {
+          isEqual =
+            prev.totalAtkStars === curr.totalAtkStars &&
+            prev.totalAtkDest === curr.totalAtkDest;
+        } else {
+          isEqual =
+            prev.totalDefStars === curr.totalDefStars &&
+            prev.totalDefDest === curr.totalDefDest;
+        }
+
+        if (!isEqual) {
+          currentRank = i + 1;
+          currentMedalTier++;
+        }
+      }
+      mappedPlayers[i].rank = currentRank;
+      mappedPlayers[i].medalTier = currentMedalTier;
+    }
+
+    players.value = mappedPlayers;
+    // ... (reszta kodu funkcji fetchData bez zmian)
+
+    players.value = mappedPlayers;
+
     warsCount.value = response.data.warsCount;
     seasonName.value = response.data.seasonName;
-    console.log(response.data);
   } catch (error) {
     console.error("Błąd pobierania:", error);
     errorMessage.value =
@@ -87,15 +125,38 @@ const fetchData = async () => {
     isLoading.value = false;
   }
 };
+const formatSeason = (seasonStr) => {
+  if (!seasonStr || typeof seasonStr !== "string") return seasonStr;
 
+  const parts = seasonStr.split("-");
+  if (parts.length !== 2) return seasonStr;
+
+  const [year, month] = parts;
+  const monthNames = {
+    "01": "Styczeń",
+    "02": "Luty",
+    "03": "Marzec",
+    "04": "Kwiecień",
+    "05": "Maj",
+    "06": "Czerwiec",
+    "07": "Lipiec",
+    "08": "Sierpień",
+    "09": "Wrzesień",
+    10: "Październik",
+    11: "Listopad",
+    12: "Grudzień",
+  };
+
+  return `${monthNames[month] || month} ${year}`;
+};
 const getAvgClass = (player) => {
   if (!player) return "";
 
   if (reportMode.value === "defense") {
     const score = Number(player.avgDefStars) || 0;
-    if (score === 0) return "perfect";
-    if (score <= 1.5) return "good";
-    if (score <= 2.0) return "neutral";
+    if (score <= 1.5) return "perfect";
+    if (score <= 2.0) return "good";
+    if (score <= 2.5) return "neutral";
     return "negative";
   }
 
@@ -109,16 +170,30 @@ const getAvgClass = (player) => {
 const formatWarValue = (val, unit) =>
   val === null || val === undefined ? "" : `${val}${unit}`;
 
-const getRankDisplay = (i) => (i < 3 ? ["🥇", "🥈", "🥉"][i] : `${i + 1}.`);
+const getRankDisplay = (i) => {
+  const player = players.value[i];
+  if (!player || player.medalTier === undefined) return `${i + 1}.`;
 
-const getPodiumClass = (i) =>
-  i === 0
-    ? "podium-gold"
-    : i === 1
-      ? "podium-silver"
-      : i === 2
-        ? "podium-bronze"
-        : "";
+  if (player.medalTier === 1) return "🥇";
+  if (player.medalTier === 2) return "🥈";
+  if (player.medalTier === 3) return "🥉";
+  return `${player.rank}.`;
+};
+
+const getPodiumClass = (i) => {
+  const player = players.value[i];
+  if (!player || player.medalTier === undefined) return "";
+
+  if (player.medalTier === 1) return "podium-gold";
+  if (player.medalTier === 2) return "podium-silver";
+  if (player.medalTier === 3) return "podium-bronze";
+  return "";
+};
+const leadersDisplay = computed(() => {
+  if (!players.value.length) return "---";
+  const topPlayers = players.value.filter((p) => p.rank === 1);
+  return topPlayers.map((p) => p.name).join(", ");
+});
 
 watch(
   [reportMode, subSortMode, filterMode, selectedSeason, startDate, endDate],
@@ -131,7 +206,7 @@ onMounted(() => fetchData());
 </script>
 
 <template>
-  <div class="report-view" :class="reportMode">
+  <div class="report-view glory-theme" :class="reportMode">
     <header class="header-main">
       <div class="header-container">
         <router-link to="/" class="back-link"
@@ -145,9 +220,12 @@ onMounted(() => fetchData());
             <span class="text-inline">Analiza Wojenna</span>
           </div>
           <h1>LISTA <span>CHWAŁY</span></h1>
+
           <div class="season-badge">
-            <span v-if="!seasonName.includes('Zakres')">Sezon </span>
-            {{ seasonName }}
+            <span class="season-text" v-if="!seasonName.includes('Zakres')"
+              >Sezon:
+            </span>
+            {{ formatSeason(seasonName) }}
           </div>
         </div>
       </div>
@@ -248,7 +326,7 @@ onMounted(() => fetchData());
                 class="custom-select"
               >
                 <option v-for="s in seasonsList" :key="s" :value="s">
-                  {{ s }}
+                  {{ formatSeason(s) }}
                 </option>
               </select>
               <div v-else class="date-inputs">
@@ -278,7 +356,7 @@ onMounted(() => fetchData());
             <font-awesome-icon icon="fa-solid fa-crown" />
             <span class="text-inline">Lider</span>
           </span>
-          <span class="stat-value">{{ players[0]?.name || "---" }}</span>
+          <span class="stat-value">{{ leadersDisplay }}</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">
@@ -318,29 +396,31 @@ onMounted(() => fetchData());
           </span>
         </div>
 
-        <div v-if="isLoading" class="loader-container">
-          <div class="spinner"></div>
-          <p>PRZETWARZANIE DANYCH...</p>
-        </div>
+        <LoadingSpinner
+          v-if="isLoading"
+          type="glory"
+          message="Przetwarzanie Danych..."
+        />
 
-        <div v-else-if="errorMessage" class="empty-state-container error">
-          <div class="icon">⚠️</div>
-          <h3>Coś poszło nie tak</h3>
-          <p>{{ errorMessage }}</p>
-          <button @click="fetchData" class="retry-btn">Spróbuj ponownie</button>
-        </div>
+        <ErrorMessage
+          v-else-if="errorMessage"
+          is-error
+          show-retry
+          icon="⚠️"
+          title="Coś poszło nie tak"
+          :message="errorMessage"
+          @retry="fetchData"
+        />
 
-        <div v-else-if="players.length === 0" class="empty-state-container">
-          <div class="icon">🔍</div>
-          <h3>Brak danych do wyświetlenia</h3>
-          <p>
-            W wybranym okresie nie znaleziono żadnych zapisanych wojen
-            klanowych.
-          </p>
-        </div>
+        <ErrorMessage
+          v-else-if="players.length === 0"
+          icon="🔍"
+          title="Brak danych do wyświetlenia"
+          message="W wybranym okresie nie znaleziono żadnych zapisanych wojen klanowych."
+        />
 
         <div v-else class="table-wrapper no-scrollbar">
-          <AttackReport
+          <GloryAttackReport
             v-if="reportMode === 'attack'"
             :players="players"
             :getRankDisplay="getRankDisplay"
@@ -349,7 +429,7 @@ onMounted(() => fetchData());
             :formatWarValue="formatWarValue"
           />
 
-          <DefenseReport
+          <GloryDefenseReport
             v-else
             :players="players"
             :getRankDisplay="getRankDisplay"
@@ -361,29 +441,13 @@ onMounted(() => fetchData());
       </div>
     </main>
 
-    <div class="floating-action-panel">
-      <button
-        @click="exportToExcel"
-        class="action-btn excel-btn"
-        data-tooltip="Eksportuj tabelę do Excela (Coming Soon)"
-      >
-        <font-awesome-icon icon="fa-solid fa-file-excel" />
-      </button>
-      <button
-        @click="isModalOpen = true"
-        class="action-btn info-btn"
-        data-tooltip="Informacje o systemie"
-      >
-        <font-awesome-icon icon="fa-solid fa-circle-question" />
-      </button>
-    </div>
-    <GloryInfoModal :is-open="isModalOpen" @close="isModalOpen = false" />
+    <FloatingActionPanel
+      @export-excel="exportToExcel"
+      @open-info="isModalOpen = true"
+    />
+    <InfoModal :is-open="isModalOpen" @close="isModalOpen = false" />
 
-    <footer>
-      <p>
-        &copy; 2026 Polska Husaria Management System v2.1 • Made By &#64;Kondi
-      </p>
-    </footer>
+    <Footer />
   </div>
 </template>
 

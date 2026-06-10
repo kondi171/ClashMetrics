@@ -1,18 +1,28 @@
-function getSeasonName(wars) {
-  if (!wars || wars.length === 0) return "NIEZNANY SEZON";
+const getSeasonKey = (dateStr) => {
+  if (!dateStr) return "Nieznany";
+  return `${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}`;
+};
 
-  const firstWarDate = wars[0].startTime;
-
-  const year = firstWarDate.substring(0, 4);
-  const month = firstWarDate.substring(4, 6);
-  const day = firstWarDate.substring(6, 8);
-
-  const date = new Date(`${year}-${month}-${day}`);
-  const monthName = date.toLocaleString("pl-PL", { month: "long" });
-
-  return `${monthName.toUpperCase()} ${year}`;
-}
-
+const formatSeasonName = (key) => {
+  if (!key || key === "Nieznany") return "Własny zakres";
+  const [year, month] = key.split("-");
+  const months = [
+    "Styczeń",
+    "Luty",
+    "Marzec",
+    "Kwiecień",
+    "Maj",
+    "Czerwiec",
+    "Lipiec",
+    "Sierpień",
+    "Wrzesień",
+    "Październik",
+    "Listopad",
+    "Grudzień",
+  ];
+  return `${months[parseInt(month) - 1]} ${year}`;
+};
 module.exports = {
-  getSeasonName,
+  getSeasonKey,
+  formatSeasonName,
 };
